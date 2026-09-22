@@ -7,12 +7,12 @@ n_layers = 4
 n_heads = 8
 n_kv_heads = 2
 head_dim = 32
-max_seq_len = 128
+
 
 gamma = [(torch.ones(d_model), torch.ones(d_model)) for _ in range(n_layers)]
 final_gamma = torch.ones(d_model)
 
-model = LLaMA(vocab_size, d_model, n_layers, gamma, n_heads, n_kv_heads, head_dim, max_seq_len, final_gamma)
+model = LLaMA(vocab_size, d_model, n_layers, n_heads, n_kv_heads, head_dim)
 
 B, L = 2, 16
 token_ids = torch.randint(0, vocab_size, (B, L))
@@ -51,3 +51,7 @@ print("OK: greedy deterministic")
 eos_real = 5
 out_eos = model.generate([0, 1, 2], 100, eos_real, temperature=0)
 print(f"OK: EOS test, len={len(out_eos)} (expect early stop if EOS appeared)")
+
+assert len(list(model.parameters()))==38, f"参数不匹配"
+assert model.LM_head.weight is model.embedding.weight
+

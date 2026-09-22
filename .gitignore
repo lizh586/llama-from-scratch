@@ -2,3 +2,8 @@ __pycache__/
 *.pyc
 .DS_Store
 .vscode/
+
+# 数据集与训练产物（不进仓库，见 README「数据与权重」）
+data/
+*.pt
+*.pth

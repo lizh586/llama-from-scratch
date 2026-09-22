@@ -1,27 +1,27 @@
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
 
-class SwiGLU():
+class SwiGLU(nn.Module):
     def __init__(self, d_model):
+        super().__init__()
         d_ff_gate = int(8 * d_model / 3)
-        self.W_gate = torch.ones(d_model, d_ff_gate)
+        
+        """ self.W_gate = torch.ones(d_model, d_ff_gate)
         self.W_up = torch.ones(d_model, d_ff_gate)
-        self.W_down = torch.ones(d_ff_gate, d_model)
+        self.W_down = torch.ones(d_ff_gate, d_model) """
+
+        self.W_gate = nn.Linear(d_model,d_ff_gate, bias=False )
+        self.W_up = nn.Linear(d_model, d_ff_gate, bias = False)
+        self.W_down = nn.Linear(d_ff_gate, d_model, bias=False)
 
     def forward(self, x):
-        gate_pre = x @ self.W_gate
-        self.gate_pre = gate_pre
-        gate = F.silu(gate_pre)
-        self.gate = gate
-        up = x @ self.W_up
-        self.up = up
+        gate = F.silu(self.W_gate(x))
+        up =  self.W_up(x)
         hidden = gate * up
-        self.hidden = hidden
-        output = hidden @ self.W_down
-        self.x = x
-        return output
+        return self.W_down(hidden)
     
-    def backward(self, doutput):
+    """ def backward(self, doutput):
         dhidden = doutput @ self.W_down.T
         dW_down = self.hidden.T @ doutput
         dgate = dhidden * self.up
@@ -33,4 +33,4 @@ class SwiGLU():
         self.dW_down = dW_down
         self.dW_gate = dW_gate
         self.dW_up = dW_up
-        return dx
+        return dx """
